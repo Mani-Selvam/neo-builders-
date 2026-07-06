@@ -1,0 +1,1 @@
+- [NeoBuilder ERP auth/permission shape](neobuilder-erp-auth-shape.md) — backend user/role/permission JSON shape frontend must match; signup field names differ from generic "name".
