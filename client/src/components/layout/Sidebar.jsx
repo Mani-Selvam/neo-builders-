@@ -1,8 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import * as Icons from 'lucide-react';
 import { Building2, ChevronDown, X } from 'lucide-react';
 import { sidebarGroups } from '../../config/mastersConfig';
 import { useAuth } from '../../contexts/AuthContext';
+
+function DynamicIcon({ name, size = 16, className }) {
+  const IconComp = Icons[name] || Icons.Circle;
+  return <IconComp size={size} className={className} />;
+}
+
+function GroupPanel({ isOpen, children }) {
+  const innerRef = useRef(null);
+  const [maxHeight, setMaxHeight] = useState(isOpen ? 'none' : '0px');
+
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    if (isOpen) {
+      const height = el.scrollHeight;
+      setMaxHeight(height + 'px');
+      const timeout = setTimeout(() => setMaxHeight('none'), 220);
+      return () => clearTimeout(timeout);
+    }
+    setMaxHeight(el.scrollHeight + 'px');
+    requestAnimationFrame(() => setMaxHeight('0px'));
+  }, [isOpen]);
+
+  return (
+    <div className="sidebar-group-panel" style={{ maxHeight }}>
+      <div className="sidebar-group-items" ref={innerRef}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function Sidebar({ open, onClose }) {
   const { user } = useAuth();
@@ -62,23 +94,25 @@ export default function Sidebar({ open, onClose }) {
                   className={`sidebar-group-title ${isOpen ? 'is-open' : ''}`}
                   onClick={() => toggleGroup(group.title)}
                 >
-                  <span>{group.title}</span>
+                  <span className="sidebar-group-title-left">
+                    {group.icon && <DynamicIcon name={group.icon} size={15} className="sidebar-group-icon" />}
+                    <span>{group.title}</span>
+                  </span>
                   <ChevronDown size={14} className="sidebar-group-chevron" />
                 </button>
-                {isOpen && (
-                  <div className="sidebar-group-items">
-                    {visibleItems.map((item) => (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                        onClick={onClose}
-                      >
-                        {item.label}
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
+                <GroupPanel isOpen={isOpen}>
+                  {visibleItems.map((item) => (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                      onClick={onClose}
+                    >
+                      {item.icon && <DynamicIcon name={item.icon} size={15} className="sidebar-link-icon" />}
+                      <span>{item.label}</span>
+                    </NavLink>
+                  ))}
+                </GroupPanel>
               </div>
             );
           })}
