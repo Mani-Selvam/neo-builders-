@@ -76,8 +76,8 @@ export default function Sidebar({ open, onClose }) {
       {open && <div className="sidebar-backdrop" onClick={onClose} />}
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="sidebar-brand">
-          <Building2 size={22} />
-          <span>NeoBuilder ERP</span>
+          <img src="/images/logo.png" alt="NeoBuilder ERP Logo" style={{ height: '42px', maxWidth: '100%', objectFit: 'contain' }} />
+          <span>Neophron</span>
           <button className="sidebar-close" onClick={onClose} aria-label="Close menu">
             <X size={18} />
           </button>

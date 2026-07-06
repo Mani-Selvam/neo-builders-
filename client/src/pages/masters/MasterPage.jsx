@@ -7,6 +7,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useConfirm } from '../../contexts/ConfirmContext';
 import { getPath } from '../../utils/objectPath';
 import MasterFormModal from '../../components/masters/MasterFormModal';
+import MasterViewModal from '../../components/masters/MasterViewModal';
 import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -27,6 +28,7 @@ export default function MasterPage() {
   const [pageSize] = useState(10);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
+  const [viewingRow, setViewingRow] = useState(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -68,7 +70,7 @@ export default function MasterPage() {
 
   const handleToggleStatus = async (row) => {
     try {
-      const nextStatus = row.status === 'active' ? 'inactive' : 'active';
+      const nextStatus = row.status === 'Active' ? 'Inactive' : 'Active';
       await api.updateStatus(row._id, nextStatus);
       toast.success('Status updated');
       fetchData();
@@ -150,6 +152,9 @@ export default function MasterPage() {
                       </button>
                     </td>
                     <td className="col-actions">
+                      <button className="icon-btn" onClick={() => setViewingRow(row)} aria-label="View">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </button>
                       <button className="icon-btn" onClick={() => { setEditingRow(row); setModalOpen(true); }} aria-label="Edit">
                         <Pencil size={15} />
                       </button>
@@ -177,6 +182,14 @@ export default function MasterPage() {
           toast={toast}
           onClose={() => setModalOpen(false)}
           onSaved={() => { setModalOpen(false); fetchData(); }}
+        />
+      )}
+
+      {viewingRow && (
+        <MasterViewModal
+          config={config}
+          data={viewingRow}
+          onClose={() => setViewingRow(null)}
         />
       )}
     </div>

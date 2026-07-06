@@ -19,6 +19,9 @@ export const dashboardApi = {
 export const companyApi = {
   getProfile: () => axiosClient.get('/company/profile'),
   updateProfile: (payload) => axiosClient.put('/company/profile', payload),
+  uploadLogo: (formData) => axiosClient.post('/company/profile/logo', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   dismissPrompt: () => axiosClient.post('/company/profile/dismiss-prompt'),
 };
 

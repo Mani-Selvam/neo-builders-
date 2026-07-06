@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Menu, Sun, Moon, Monitor, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, Sun, Moon, Monitor, LogOut, User, ChevronDown, Search } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
@@ -34,16 +34,30 @@ export default function Topbar({ onMenuClick }) {
 
   return (
     <header className="topbar">
-      <button className="icon-btn mobile-only" onClick={onMenuClick} aria-label="Open menu">
+      <button className="icon-btn" onClick={onMenuClick} aria-label="Toggle menu">
         <Menu size={20} />
       </button>
+      
+      <div className="topbar-search">
+        <Search className="topbar-search-icon" size={16} />
+        <input type="text" placeholder="Search..." />
+      </div>
+
       <div className="topbar-spacer" />
       <button className="icon-btn" onClick={cycleTheme} title={`Theme: ${mode}`} aria-label="Toggle theme">
         <ThemeIcon size={18} />
       </button>
       <div className="topbar-user" ref={ref}>
         <button className="topbar-user-btn" onClick={() => setMenuOpen((v) => !v)}>
-          <div className="avatar">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</div>
+          {user?.company?.logo?.url ? (
+            <img 
+              src={`http://localhost:8000${user.company.logo.url}`} 
+              alt="Company Logo" 
+              style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', borderRadius: '4px' }} 
+            />
+          ) : (
+            <div className="avatar">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</div>
+          )}
           <span className="topbar-user-name">{user?.name}</span>
           <ChevronDown size={14} />
         </button>

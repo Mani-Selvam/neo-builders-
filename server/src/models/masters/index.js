@@ -221,6 +221,15 @@ export const Work = createMasterModel(
   { uniqueWith: 'workName', refs: [{ path: 'unitId', ref: 'ItemUOM' }] }
 );
 
+export const FillingStation = createMasterModel(
+  'FillingStation',
+  {
+    stationName: { type: String, required: true, trim: true },
+    location: { type: String, trim: true },
+  },
+  { uniqueWith: 'stationName' }
+);
+
 export const MASTER_REGISTRY = {
   departments: { model: Department, label: 'Department' },
   designations: { model: Designation, label: 'Designation' },
@@ -238,4 +247,5 @@ export const MASTER_REGISTRY = {
   'vehicle-types': { model: VehicleType, label: 'Vehicle Type' },
   trucks: { model: Truck, label: 'Truck' },
   works: { model: Work, label: 'Work' },
+  'filling-stations': { model: FillingStation, label: 'Filling Station' },
 };

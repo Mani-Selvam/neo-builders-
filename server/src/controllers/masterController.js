@@ -34,9 +34,15 @@ export function createMasterController(model, moduleName, searchableFields = [])
         const pageNum = Math.max(parseInt(page, 10) || 1, 1);
         const limitNum = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 200);
 
+        let queryObj = model.find(query);
+        if (model.refs && model.refs.length) {
+          model.refs.forEach(ref => {
+            queryObj = queryObj.populate(ref.path);
+          });
+        }
+
         const [items, total] = await Promise.all([
-          model
-            .find(query)
+          queryObj
             .sort(sort)
             .skip((pageNum - 1) * limitNum)
             .limit(limitNum),
@@ -60,7 +66,13 @@ export function createMasterController(model, moduleName, searchableFields = [])
     async listAll(req, res, next) {
       try {
         const query = { companyId: req.user.companyId, status: 'Active' };
-        const items = await model.find(query).sort('-createdAt').limit(1000);
+        let queryObj = model.find(query).sort('-createdAt').limit(1000);
+        if (model.refs && model.refs.length) {
+          model.refs.forEach(ref => {
+            queryObj = queryObj.populate(ref.path);
+          });
+        }
+        const items = await queryObj;
         return success(res, { data: items });
       } catch (err) {
         next(err);
@@ -69,7 +81,13 @@ export function createMasterController(model, moduleName, searchableFields = [])
 
     async getOne(req, res, next) {
       try {
-        const doc = await model.findOne({ _id: req.params.id, companyId: req.user.companyId });
+        let queryObj = model.findOne({ _id: req.params.id, companyId: req.user.companyId });
+        if (model.refs && model.refs.length) {
+          model.refs.forEach(ref => {
+            queryObj = queryObj.populate(ref.path);
+          });
+        }
+        const doc = await queryObj;
         if (!doc) throw new ApiError(404, `${moduleName} record not found`);
         return success(res, { data: doc });
       } catch (err) {

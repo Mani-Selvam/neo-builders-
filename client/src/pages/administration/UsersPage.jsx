@@ -107,7 +107,7 @@ export default function UsersPage() {
 
   const handleToggleStatus = async (user) => {
     try {
-      await axiosClient.patch(`/users/${user._id}/status`, { status: user.status === 'active' ? 'inactive' : 'active' });
+      await axiosClient.patch(`/users/${user._id}/status`, { status: user.status === 'Active' ? 'Inactive' : 'Active' });
       toast.success('Status updated');
       fetchData();
     } catch (err) {

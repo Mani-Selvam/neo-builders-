@@ -4,13 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n CLIENT,SERVER -c blue,green \"npm:dev:client\" \"npm:dev:server\"",
-    "dev:client": "vite",
-    "dev:server": "node server/src/server.js",
+    "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "start": "NODE_ENV=production node server/src/server.js"
+    "start": "cd server && node src/server.js"
   },
   "dependencies": {
     "axios": "^1.18.1",
@@ -24,6 +22,7 @@
     "lucide-react": "^0.469.0",
     "mongoose": "^8.24.1",
     "morgan": "^1.11.0",
+    "multer": "^2.2.0",
     "nanoid": "^5.1.16",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -36,7 +35,6 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "concurrently": "^9.2.3",
     "oxlint": "^1.71.0",
     "vite": "^8.1.1"
   }

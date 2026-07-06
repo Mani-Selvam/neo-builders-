@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { companyApi } from '../../api/masterApi';
 import { useToast } from '../../contexts/ToastContext';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 const FIELDS = [
   { name: 'companyName', label: 'Company Name', required: true },
   { name: 'gstNo', label: 'GST No' },
@@ -18,9 +20,12 @@ const FIELDS = [
 
 export default function CompanyProfilePage() {
   const toast = useToast();
+  const { refreshUser } = useAuth();
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     companyApi
@@ -43,6 +48,41 @@ export default function CompanyProfilePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const uploadLogoFile = async (file) => {
+    if (!file) return;
+    setUploadingLogo(true);
+    const formData = new FormData();
+    formData.append('logo', file);
+    try {
+      const { data } = await companyApi.uploadLogo(formData);
+      setCompany(data.data);
+      await refreshUser();
+      toast.success('Logo uploaded successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to upload logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleLogoUpload = (e) => uploadLogoFile(e.target.files?.[0]);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    uploadLogoFile(e.dataTransfer.files?.[0]);
   };
 
   if (loading) return <div className="table-loading">Loading…</div>;
@@ -70,6 +110,36 @@ export default function CompanyProfilePage() {
 
       <form className="table-card" onSubmit={handleSubmit}>
         <div className="modal-body" style={{ padding: '24px' }}>
+          <label 
+            className="logo-upload-section" 
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', 
+              cursor: 'pointer', padding: '16px', border: `2px dashed ${isDragging ? 'var(--accent)' : 'var(--border)'}`, 
+              borderRadius: '12px', transition: 'background 0.2s, border-color 0.2s',
+              background: isDragging ? 'var(--bg-hover)' : 'transparent'
+            }}
+            onMouseOver={(e) => { if(!isDragging) e.currentTarget.style.background = 'var(--bg-hover)'; }}
+            onMouseOut={(e) => { if(!isDragging) e.currentTarget.style.background = 'transparent'; }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <div className="logo-preview" style={{ width: '80px', height: '80px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--bg-elevated)' }}>
+              {company?.logo?.url ? (
+                <img src={`http://localhost:8000${company.logo.url}`} alt="Company Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              ) : (
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No Logo</span>
+              )}
+            </div>
+            <div>
+              <div className="btn" style={{ pointerEvents: 'none', display: 'inline-block' }}>
+                {uploadingLogo ? 'Uploading...' : 'Click to Upload Logo'}
+              </div>
+              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoUpload} disabled={uploadingLogo} />
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', pointerEvents: 'none', margin: '8px 0 0 0' }}>Recommended size: 256x256. Max 2MB.</p>
+            </div>
+          </label>
+
           <div className="form-grid">
             {FIELDS.map((f) => (
               <div key={f.name} className="form-group">

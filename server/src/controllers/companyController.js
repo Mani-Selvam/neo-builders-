@@ -48,6 +48,44 @@ export async function updateProfile(req, res, next) {
   }
 }
 
+export async function uploadLogo(req, res, next) {
+  try {
+    if (!req.file) {
+      throw new Error('No file uploaded');
+    }
+
+    const company = await Company.findById(req.user.companyId);
+    if (!company) throw new Error('Company not found');
+
+    const before = company.toObject();
+    const fileUrl = `/uploads/${req.file.filename}`;
+    
+    company.logo = {
+      url: fileUrl,
+      publicId: req.file.filename
+    };
+    company.recalculateProfileCompletion();
+    await company.save();
+
+    await AuditLog.create({
+      companyId: company._id,
+      userId: req.user.userId,
+      userName: req.user.name,
+      module: 'company',
+      action: 'upload_logo',
+      entityId: company._id,
+      oldData: before,
+      newData: company.toObject(),
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'] || '',
+    });
+
+    return success(res, { message: 'Logo uploaded successfully', data: company });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function dismissProfilePrompt(req, res, next) {
   try {
     const company = await Company.findById(req.user.companyId);

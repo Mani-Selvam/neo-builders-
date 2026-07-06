@@ -288,6 +288,21 @@ export const mastersConfig = {
       { name: 'unitId', label: 'Unit', type: 'select', refEndpoint: 'item-uoms', refLabel: 'uomName', required: true },
     ],
   },
+  'filling-stations': {
+    title: 'Filling Station',
+    plural: 'Filling Stations',
+    description: 'Manage fuel filling stations',
+    endpoint: 'filling-stations',
+    moduleKey: 'fillingStations',
+    columns: [
+      { key: 'stationName', label: 'Station Name' },
+      { key: 'location', label: 'Location' },
+    ],
+    fields: [
+      { name: 'stationName', label: 'Station Name', type: 'text', required: true },
+      { name: 'location', label: 'Location', type: 'text' },
+    ],
+  },
 };
 
 export const sidebarGroups = [
@@ -295,6 +310,24 @@ export const sidebarGroups = [
     title: 'Overview',
     icon: 'LayoutDashboard',
     items: [{ label: 'Dashboard', path: '/dashboard', moduleKey: 'dashboard', icon: 'LayoutDashboard' }],
+  },
+
+  {
+    title: 'Main Masters',
+    icon: 'Layers',
+    items: [
+      { label: 'Site Type', path: '/masters/site-types', moduleKey: 'siteTypes', icon: 'MapPinned' },
+      { label: 'Site', path: '/masters/sites', moduleKey: 'sites', icon: 'MapPin' },
+      { label: 'Item Category', path: '/masters/item-categories', moduleKey: 'itemCategories', icon: 'FolderTree' },
+      { label: 'Item UOM', path: '/masters/item-uoms', moduleKey: 'itemUoms', icon: 'Ruler' },
+      { label: 'Item Master', path: '/masters/items', moduleKey: 'items', icon: 'Package' },
+      { label: 'Work Master', path: '/masters/works', moduleKey: 'works', icon: 'Construction' },
+      { label: 'Labour Type', path: '/masters/labour-types', moduleKey: 'labourTypes', icon: 'Hammer' },
+      { label: 'Vehicle Type', path: '/masters/vehicle-types', moduleKey: 'vehicleTypes', icon: 'CarFront' },
+      { label: 'Trucks', path: '/masters/trucks', moduleKey: 'trucks', icon: 'Truck' },
+      { label: 'Filling Stations', path: '/masters/filling-stations', moduleKey: 'fillingStations', icon: 'Fuel' },
+      { label: 'Expenses Master', path: '/masters/expenses', moduleKey: 'expenses', icon: 'Receipt' },
+    ],
   },
   {
     title: 'People Masters',
@@ -306,22 +339,6 @@ export const sidebarGroups = [
       { label: 'Supplier', path: '/people/suppliers', moduleKey: 'suppliers', icon: 'Truck' },
       { label: 'Labourer', path: '/people/labourers', moduleKey: 'labourers', icon: 'HardHat' },
       { label: 'Employee', path: '/people/employees', moduleKey: 'employees', icon: 'UserRound' },
-    ],
-  },
-  {
-    title: 'Main Masters',
-    icon: 'Layers',
-    items: [
-      { label: 'Expenses', path: '/masters/expenses', moduleKey: 'expenses', icon: 'Receipt' },
-      { label: 'Item Category', path: '/masters/item-categories', moduleKey: 'itemCategories', icon: 'FolderTree' },
-      { label: 'Item UOM', path: '/masters/item-uoms', moduleKey: 'itemUoms', icon: 'Ruler' },
-      { label: 'Item', path: '/masters/items', moduleKey: 'items', icon: 'Package' },
-      { label: 'Labour Type', path: '/masters/labour-types', moduleKey: 'labourTypes', icon: 'Hammer' },
-      { label: 'Site Type', path: '/masters/site-types', moduleKey: 'siteTypes', icon: 'MapPinned' },
-      { label: 'Site', path: '/masters/sites', moduleKey: 'sites', icon: 'MapPin' },
-      { label: 'Vehicle Type', path: '/masters/vehicle-types', moduleKey: 'vehicleTypes', icon: 'CarFront' },
-      { label: 'Truck', path: '/masters/trucks', moduleKey: 'trucks', icon: 'Truck' },
-      { label: 'Work', path: '/masters/works', moduleKey: 'works', icon: 'Construction' },
     ],
   },
   {
