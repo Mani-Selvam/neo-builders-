@@ -7,7 +7,7 @@ function getSystemTheme() {
 }
 
 export function ThemeProvider({ children }) {
-  const [mode, setMode] = useState(() => localStorage.getItem('theme') || 'system');
+  const [mode, setMode] = useState('light');
 
   const resolvedTheme = useMemo(() => (mode === 'system' ? getSystemTheme() : mode), [mode]);
 
