@@ -33,6 +33,10 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
+app.get('/', (req, res) => {
+  res.send('<h1>NeoBuilder ERP API is running</h1>');
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'NeoBuilder ERP API is running' });
 });

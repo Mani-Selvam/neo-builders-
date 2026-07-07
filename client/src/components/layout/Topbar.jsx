@@ -51,7 +51,7 @@ export default function Topbar({ onMenuClick }) {
         <button className="topbar-user-btn" onClick={() => setMenuOpen((v) => !v)}>
           {user?.company?.logo?.url ? (
             <img 
-              src={`http://localhost:8000${user.company.logo.url}`} 
+              src={`${import.meta.env.VITE_API_URL}${user.company.logo.url}`} 
               alt="Company Logo" 
               style={{ height: '32px', maxWidth: '120px', objectFit: 'contain', borderRadius: '4px' }} 
             />

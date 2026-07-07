@@ -26,7 +26,7 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <ConfirmProvider>
-          <BrowserRouter>
+          <BrowserRouter basename="/neobuilderspanel">
             <AuthProvider>
               <Routes>
                 <Route element={<GuestRoute />}>

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/neobuilderspanel/',
   root: 'client',
   plugins: [react()],
   server: {
@@ -24,7 +25,7 @@ export default defineConfig({
     allowedHosts: true,
   },
   build: {
-    outDir: '../dist/client',
+    outDir: '../dist',
     emptyOutDir: true,
   },
 })

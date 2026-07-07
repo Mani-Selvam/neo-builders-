@@ -85,6 +85,15 @@ export default function CompanyProfilePage() {
     uploadLogoFile(e.dataTransfer.files?.[0]);
   };
 
+  // Helper to build absolute URL for logo images
+  const getLogoUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const base = import.meta.env.VITE_API_URL.replace(/\/$/, '');
+    const cleanPath = url.replace(/^\//, '').replace(/^\/?/, '');
+    return `${base}/${cleanPath}`;
+  };
+
   if (loading) return <div className="table-loading">Loading…</div>;
 
   const completion = company?.profileCompletionPercentage ?? 0;
@@ -124,12 +133,8 @@ export default function CompanyProfilePage() {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <div className="logo-preview" style={{ width: '80px', height: '80px', borderRadius: '8px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--bg-elevated)' }}>
-              {company?.logo?.url ? (
-                <img src={`http://localhost:8000${company.logo.url}`} alt="Company Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-              ) : (
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No Logo</span>
-              )}
+            <div style={{ width: '120px', height: '120px', overflow: 'hidden' }}>
+              <img src={company?.logo?.url ? getLogoUrl(company.logo.url) : ''} alt="Company Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <div>
               <div className="btn" style={{ pointerEvents: 'none', display: 'inline-block' }}>
