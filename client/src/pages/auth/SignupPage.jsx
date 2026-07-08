@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Building2, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { authApi } from '../../api/authApi';
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -23,6 +24,25 @@ export default function SignupPage() {
   const [error, setError] = useState('');
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
+  const handleEmailBlur = async () => {
+    const email = form.email.trim();
+    if (!email) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return;
+
+    try {
+      const { data } = await authApi.checkEmail(email);
+      if (data.data && data.data.exists) {
+        setError('An account with this email already exists');
+      } else {
+        setError(prev => prev === 'An account with this email already exists' ? '' : prev);
+      }
+    } catch (err) {
+      console.error('Failed to check email availability', err);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,7 +87,7 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-      
+
       <div className="auth-form-side">
         <div className="auth-card">
           <h1>Create your company</h1>
@@ -92,19 +112,29 @@ export default function SignupPage() {
             </div>
             <div className="form-group">
               <label>Email Address</label>
-              <input type="email" required placeholder="you@company.com" value={form.email} onChange={update('email')} />
+              <input
+                type="email"
+                required
+                placeholder="you@company.com"
+                value={form.email}
+                onChange={(e) => {
+                  setError(prev => prev === 'An account with this email already exists' ? '' : prev);
+                  setForm({ ...form, email: e.target.value });
+                }}
+                onBlur={handleEmailBlur}
+              />
             </div>
             <div className="form-grid">
               <div className="form-group">
                 <label>Password</label>
                 <div className="input-icon">
-                  <input 
-                    type={showPassword ? 'text' : 'password'} 
-                    required 
-                    minLength={6} 
-                    placeholder="••••••••" 
-                    value={form.password} 
-                    onChange={update('password')} 
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={update('password')}
                   />
                   <button type="button" className="input-icon-btn" onClick={() => setShowPassword((v) => !v)}>
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -114,13 +144,13 @@ export default function SignupPage() {
               <div className="form-group">
                 <label>Confirm Password</label>
                 <div className="input-icon">
-                  <input 
-                    type={showConfirmPassword ? 'text' : 'password'} 
-                    required 
-                    minLength={6} 
-                    placeholder="••••••••" 
-                    value={form.confirmPassword} 
-                    onChange={update('confirmPassword')} 
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="••••••••"
+                    value={form.confirmPassword}
+                    onChange={update('confirmPassword')}
                   />
                   <button type="button" className="input-icon-btn" onClick={() => setShowConfirmPassword((v) => !v)}>
                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}

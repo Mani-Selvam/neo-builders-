@@ -21,8 +21,6 @@ export async function getStats(req, res, next) {
       User.countDocuments({ companyId, status: 'Active' }),
     ]);
 
-    const recentEmployees = await Employee.find({ companyId }).sort('-createdAt').limit(5);
-    const recentActivity = await AuditLog.find({ companyId }).sort('-createdAt').limit(10);
     const company = await Company.findById(companyId);
 
     return success(res, {
@@ -31,8 +29,6 @@ export async function getStats(req, res, next) {
           totalEmployees, activeSites, totalClients, totalSuppliers,
           totalLabourers, totalItems, totalTrucks, activeUsers,
         },
-        recentEmployees,
-        recentActivity,
         company: {
           profileCompletionPercentage: company.profileCompletionPercentage,
           profileCompleted: company.profileCompleted,

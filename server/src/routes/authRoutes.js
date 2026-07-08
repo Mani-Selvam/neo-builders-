@@ -10,6 +10,7 @@ import {
 const router = Router();
 
 router.post('/signup', authRateLimiter, validateRequest(signupSchema), authController.signup);
+router.get('/check-email', authRateLimiter, authController.checkEmail);
 router.post('/login', authRateLimiter, validateRequest(loginSchema), authController.login);
 router.post('/refresh', authController.refresh);
 router.post('/logout', authController.logout);

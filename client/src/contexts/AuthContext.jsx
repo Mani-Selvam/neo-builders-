@@ -31,6 +31,23 @@ export function AuthProvider({ children }) {
     })();
   }, [clearSession]);
 
+  // Periodic status check to log out inactive company accounts instantly
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(async () => {
+      try {
+        await authApi.me();
+      } catch (err) {
+        if (err.response?.status === 401) {
+          clearSession();
+        }
+      }
+    }, 10000); // Check status every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [user, clearSession]);
+
   const login = async (payload) => {
     const { data } = await authApi.login(payload);
     setAccessToken(data.data.accessToken);

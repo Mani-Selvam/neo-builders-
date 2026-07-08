@@ -134,7 +134,7 @@ export default function MasterFormModal({ config, initialData, onClose, onSaved,
 
   return (
     <div className="modal-overlay">
-      <div className="modal-panel">
+      <div className={`modal-panel ${config.fields && config.fields.length <= 2 ? 'modal-narrow' : ''}`}>
         <div className="modal-header">
           <h3>{isEdit ? `Edit ${config.title}` : `Add ${config.title}`}</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
@@ -148,7 +148,7 @@ export default function MasterFormModal({ config, initialData, onClose, onSaved,
                 {sections.length > 1 && <div className="form-section-title">{sectionName}</div>}
                 <div className="form-grid">
                   {fields.map((field) => (
-                    <div key={field.name} className={`form-group ${field.type === 'textarea' ? 'span-2' : ''}`}>
+                    <div key={field.name} className={`form-group ${field.type === 'textarea' || config.fields.length === 1 ? 'span-2' : ''}`}>
                       <label>
                         {field.label}
                         {field.required && <span className="required-mark">*</span>}

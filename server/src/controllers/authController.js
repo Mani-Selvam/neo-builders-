@@ -124,6 +124,23 @@ export async function signup(req, res, next) {
   }
 }
 
+export async function checkEmail(req, res, next) {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email parameter is required' });
+    }
+    const existing = await User.findOne({ email: email.trim().toLowerCase() });
+    return res.status(200).json({
+      success: true,
+      message: 'Email check complete',
+      data: { exists: !!existing },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
@@ -197,6 +214,9 @@ export async function refresh(req, res, next) {
     }
 
     const company = await Company.findById(user.companyId);
+    if (!company || company.status !== 'Active') {
+      throw new ApiError(401, 'Company account is inactive or deactivated');
+    }
     const role = await Role.findById(user.roleId);
 
     const accessToken = signAccessToken({ userId: user._id.toString(), companyId: user.companyId.toString() });

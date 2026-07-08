@@ -1,0 +1,92 @@
+{
+  "companies": [
+    {
+      "_id": "6a4cec316ccfe4ecfe1f7442",
+      "companyCode": "COMP-APEX",
+      "companyName": "Apex Builders Ltd.",
+      "gstNo": "22AAAAA1111A1Z1",
+      "panNo": "ABCDE1234F",
+      "registrationNo": "REG-123456",
+      "contactPerson": "Mani Selvam",
+      "mobileNo": "9876543210",
+      "email": "admin@apexbuilders.com",
+      "address": "102 Skyline Residency, Tech Park Road",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "country": "India",
+      "pincode": "600001",
+      "logo": {
+        "url": "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=128&h=128&fit=crop",
+        "publicId": "apex_logo_mock"
+      },
+      "subscriptionPlanName": "Free",
+      "status": "Active",
+      "profileCompleted": true,
+      "profileCompletionPercentage": 100,
+      "profilePromptDismissed": false,
+      "subscriptionStartDate": "2026-07-07T12:08:17.638Z",
+      "subscriptionExpiryDate": "2027-07-07T12:08:17.639Z",
+      "createdAt": "2026-07-07T12:08:17.656Z",
+      "updatedAt": "2026-07-07T12:08:17.656Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a4cec316ccfe4ecfe1f744f",
+      "companyCode": "COMP-ZENI",
+      "companyName": "Zenith Realty",
+      "gstNo": "",
+      "panNo": "",
+      "registrationNo": "",
+      "contactPerson": "Jessica Tan",
+      "mobileNo": "9123456789",
+      "email": "jessica@zenith.com",
+      "address": "",
+      "city": "",
+      "state": "",
+      "country": "Singapore",
+      "pincode": "",
+      "logo": {
+        "url": "",
+        "publicId": ""
+      },
+      "subscriptionPlanName": "Free",
+      "status": "Active",
+      "profileCompleted": false,
+      "profileCompletionPercentage": 38,
+      "profilePromptDismissed": false,
+      "subscriptionStartDate": "2026-07-07T12:08:17.835Z",
+      "subscriptionExpiryDate": "2027-07-07T12:08:17.835Z",
+      "createdAt": "2026-07-07T12:08:17.837Z",
+      "updatedAt": "2026-07-07T12:08:17.853Z",
+      "__v": 0
+    }
+  ],
+  "users": [
+    {
+      "_id": "6a4cec316ccfe4ecfe1f744d",
+      "companyId": "6a4cec316ccfe4ecfe1f7442",
+      "name": "Mani Selvam",
+      "email": "admin@apexbuilders.com",
+      "mobileNo": "9876543210",
+      "roleId": "6a4cec316ccfe4ecfe1f7444",
+      "status": "Active",
+      "isOwner": true,
+      "createdAt": "2026-07-07T12:08:17.824Z",
+      "updatedAt": "2026-07-07T12:08:17.824Z",
+      "__v": 0
+    },
+    {
+      "_id": "6a4cec316ccfe4ecfe1f745b",
+      "companyId": "6a4cec316ccfe4ecfe1f744f",
+      "name": "Jessica Tan",
+      "email": "jessica@zenith.com",
+      "mobileNo": "9123456789",
+      "roleId": "6a4cec316ccfe4ecfe1f7452",
+      "status": "Active",
+      "isOwner": true,
+      "createdAt": "2026-07-07T12:08:17.984Z",
+      "updatedAt": "2026-07-07T12:08:17.984Z",
+      "__v": 0
+    }
+  ]
+}

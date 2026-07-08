@@ -39,55 +39,19 @@ export default function DashboardPage() {
       {loading ? (
         <div className="table-loading">Loading dashboard…</div>
       ) : (
-        <>
-          <div className="stat-grid">
-            {CARD_DEFS.map(({ key, label, Icon }) => (
-              <div key={key} className="stat-card">
-                <div className="stat-icon">
-                  <Icon size={20} />
-                </div>
-                <div>
-                  <div className="stat-value">{data?.stats?.[key] ?? 0}</div>
-                  <div className="stat-label">{label}</div>
-                </div>
+        <div className="stat-grid">
+          {CARD_DEFS.map(({ key, label, Icon }) => (
+            <div key={key} className="stat-card">
+              <div className="stat-icon">
+                <Icon size={20} />
               </div>
-            ))}
-          </div>
-
-          <div className="table-card">
-            <div className="card-header">
-              <h3>Recent Activity</h3>
+              <div>
+                <div className="stat-value">{data?.stats?.[key] ?? 0}</div>
+                <div className="stat-label">{label}</div>
+              </div>
             </div>
-            {data?.recentActivity?.length > 0 ? (
-              <div className="table-wrapper">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Action</th>
-                      <th>Module</th>
-                      <th>User</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.recentActivity.map((item) => (
-                      <tr key={item._id}>
-                        <td>{item.action}</td>
-                        <td>{item.module}</td>
-                        <td>{item.userName || item.user?.name || '—'}</td>
-                        <td>{new Date(item.createdAt).toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No recent activity yet.</p>
-              </div>
-            )}
-          </div>
-        </>
+          ))}
+        </div>
       )}
     </div>
   );

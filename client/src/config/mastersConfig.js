@@ -307,9 +307,11 @@ export const mastersConfig = {
 
 export const sidebarGroups = [
   {
-    title: 'Overview',
+    isDirect: true,
+    title: 'Dashboard',
     icon: 'LayoutDashboard',
-    items: [{ label: 'Dashboard', path: '/dashboard', moduleKey: 'dashboard', icon: 'LayoutDashboard' }],
+    path: '/dashboard',
+    moduleKey: 'dashboard',
   },
 
   {

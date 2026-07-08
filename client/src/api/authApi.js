@@ -2,6 +2,7 @@ import axiosClient from './axiosClient';
 
 export const authApi = {
   signup: (payload) => axiosClient.post('/auth/signup', payload),
+  checkEmail: (email) => axiosClient.get(`/auth/check-email?email=${encodeURIComponent(email)}`),
   login: (payload) => axiosClient.post('/auth/login', payload),
   logout: () => axiosClient.post('/auth/logout'),
   refresh: () => axiosClient.post('/auth/refresh'),

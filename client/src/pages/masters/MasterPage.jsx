@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams } from 'react-router-dom';
 import { Plus, Search, Pencil, Trash2, Power } from 'lucide-react';
 import { mastersConfig } from '../../config/mastersConfig';
@@ -17,6 +18,11 @@ export default function MasterPage() {
   const config = mastersConfig[slug];
   const toast = useToast();
   const confirm = useConfirm();
+  const [portalTarget, setPortalTarget] = useState(null);
+
+  useEffect(() => {
+    setPortalTarget(document.getElementById('header-actions-target'));
+  }, []);
 
   const api = useMemo(() => createMasterApi(config.endpoint), [config.endpoint]);
 
@@ -94,26 +100,23 @@ export default function MasterPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <div>
-          <h1>{config.plural}</h1>
-          <p className="page-subtitle">{config.description}</p>
-        </div>
-        <button className="btn btn-primary" onClick={() => { setEditingRow(null); setModalOpen(true); }}>
-          <Plus size={16} /> Add {config.title}
-        </button>
-      </div>
+      {portalTarget && createPortal(
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' }}>
+          <div className="search-input header-search" style={{ margin: 0 }}>
+            <Search size={15} />
+            <input
+              placeholder={`Search ${config.plural.toLowerCase()}…`}
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            />
+          </div>
 
-      <div className="toolbar">
-        <div className="search-input">
-          <Search size={16} />
-          <input
-            placeholder={`Search ${config.plural.toLowerCase()}…`}
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          />
-        </div>
-      </div>
+          <button className="btn btn-primary header-add-btn" onClick={() => { setEditingRow(null); setModalOpen(true); }}>
+            <Plus size={15} /> <span className="btn-text">Add {config.title}</span>
+          </button>
+        </div>,
+        portalTarget
+      )}
 
       <div className="table-card">
         {loading ? (
@@ -136,7 +139,7 @@ export default function MasterPage() {
                   {config.columns.map((col) => (
                     <th key={col.key}>{col.label}</th>
                   ))}
-                  <th>Status</th>
+                  <th style={{ width: '120px' }}>Status</th>
                   <th className="col-actions">Actions</th>
                 </tr>
               </thead>
@@ -144,26 +147,28 @@ export default function MasterPage() {
                 {rows.map((row) => (
                   <tr key={row._id}>
                     {config.columns.map((col) => (
-                      <td key={col.key}>{renderCell(row, col)}</td>
+                      <td key={col.key} data-label={col.label}>{renderCell(row, col)}</td>
                     ))}
-                    <td>
+                    <td data-label="Status">
                       <button className="badge-btn" onClick={() => handleToggleStatus(row)}>
                         <StatusBadge status={row.status} />
                       </button>
                     </td>
-                    <td className="col-actions">
-                      <button className="icon-btn" onClick={() => setViewingRow(row)} aria-label="View">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                      </button>
-                      <button className="icon-btn" onClick={() => { setEditingRow(row); setModalOpen(true); }} aria-label="Edit">
-                        <Pencil size={15} />
-                      </button>
-                      <button className="icon-btn" onClick={() => handleToggleStatus(row)} aria-label="Toggle status">
-                        <Power size={15} />
-                      </button>
-                      <button className="icon-btn danger" onClick={() => handleDelete(row)} aria-label="Delete">
-                        <Trash2 size={15} />
-                      </button>
+                    <td className="col-actions" data-label="Actions">
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <button className="icon-btn" onClick={() => setViewingRow(row)} aria-label="View">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+                        </button>
+                        <button className="icon-btn" onClick={() => { setEditingRow(row); setModalOpen(true); }} aria-label="Edit">
+                          <Pencil size={15} />
+                        </button>
+                        <button className="icon-btn" onClick={() => handleToggleStatus(row)} aria-label="Toggle status">
+                          <Power size={15} />
+                        </button>
+                        <button className="icon-btn danger" onClick={() => handleDelete(row)} aria-label="Delete">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

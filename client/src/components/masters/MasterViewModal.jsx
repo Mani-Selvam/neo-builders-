@@ -6,7 +6,7 @@ export default function MasterViewModal({ config, data, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-panel view-modal" onClick={(e) => e.stopPropagation()}>
+      <div className={`modal-panel view-modal ${config.fields && config.fields.length <= 2 ? 'modal-narrow' : ''}`} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3>{config.title} Details</h3>
           <button className="icon-btn" onClick={onClose}>

@@ -29,6 +29,9 @@ export async function authenticate(req, res, next) {
     if (!company) {
       return failure(res, { message: 'Company not found', statusCode: 401 });
     }
+    if (company.status !== 'Active') {
+      return failure(res, { message: `Company account is ${company.status.toLowerCase()}. Please contact support.`, statusCode: 401 });
+    }
 
     const role = await Role.findById(user.roleId);
 
