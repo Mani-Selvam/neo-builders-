@@ -7,10 +7,12 @@ import roleRoutes from './roleRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
 import superadminRoutes from './superadminRoutes.js';
+import employeeAuthRoutes from './employeeAuthRoutes.js';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/employee-auth', employeeAuthRoutes);
 router.use('/company', companyRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/users', userRoutes);

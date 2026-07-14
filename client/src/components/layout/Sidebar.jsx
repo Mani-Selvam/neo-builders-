@@ -5,6 +5,7 @@ import { Building2, ChevronDown, X } from 'lucide-react';
 import { sidebarGroups } from '../../config/mastersConfig';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import appLogoUrl from '../../../public/images/logo.png';
 
 function DynamicIcon({ name, size = 16, className }) {
   const IconComp = Icons[name] || Icons.Circle;
@@ -37,7 +38,7 @@ function GroupPanel({ isOpen, children }) {
   );
 }
 
-export default function Sidebar({ open, onClose, collapsed }) {
+export default function Sidebar({ open, onClose, collapsed, isMobile }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,7 +68,18 @@ export default function Sidebar({ open, onClose, collapsed }) {
   const [expanded, setExpanded] = useState(() => {
     const initial = {};
     sidebarGroups.forEach((group) => {
-      initial[group.title] = group.items ? group.items.some((item) => location.pathname.startsWith(item.path)) : false;
+      let isGroupActive = false;
+      if (group.items && group.items.some((item) => location.pathname.startsWith(item.path))) {
+        isGroupActive = true;
+      }
+      if (group.subgroups) {
+        group.subgroups.forEach(sub => {
+          if (sub.items && sub.items.some(item => location.pathname.startsWith(item.path))) {
+            isGroupActive = true;
+          }
+        });
+      }
+      initial[group.title] = isGroupActive;
     });
     return initial;
   });
@@ -76,7 +88,18 @@ export default function Sidebar({ open, onClose, collapsed }) {
     setExpanded((prev) => {
       const next = { ...prev };
       sidebarGroups.forEach((group) => {
+        let isGroupActive = false;
         if (group.items && group.items.some((item) => location.pathname.startsWith(item.path))) {
+          isGroupActive = true;
+        }
+        if (group.subgroups) {
+          group.subgroups.forEach(sub => {
+            if (sub.items && sub.items.some(item => location.pathname.startsWith(item.path))) {
+              isGroupActive = true;
+            }
+          });
+        }
+        if (isGroupActive) {
           next[group.title] = true;
         }
       });
@@ -98,11 +121,19 @@ export default function Sidebar({ open, onClose, collapsed }) {
       .toUpperCase();
   };
 
+  const getLogoUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const baseUrl = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || '');
+    const cleanPath = url.replace(/^\//, '');
+    return baseUrl ? `${baseUrl.replace(/\/$/, '')}/${cleanPath}` : `/${cleanPath}`;
+  };
+
   return (
     <>
       {open && <div className="sidebar-backdrop" onClick={onClose} />}
       <aside className={`sidebar ${open ? 'open' : ''} ${collapsed ? 'collapsed' : ''}`}>
-        <div className="sidebar-brand" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 16px 20px 16px', gap: '10px', height: 'auto', borderBottom: '1px solid var(--border-color)', position: 'relative' }}>
+        <div className="sidebar-brand" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px 16px 12px 16px', gap: '4px', height: 'auto', borderBottom: '1px solid var(--border-color)', position: 'relative' }}>
           <button className="sidebar-close" onClick={onClose} aria-label="Close menu" style={{ position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
           </button>
@@ -113,19 +144,27 @@ export default function Sidebar({ open, onClose, collapsed }) {
               style={{ cursor: 'pointer', display: 'flex', justifyContent: 'center', width: '100%' }}
               data-tooltip={user?.company?.companyName || 'Company Account'}
             >
-              {user?.company?.logo?.url ? (
-                <div className="company-logo-circle" style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--accent)', padding: '1px', background: 'var(--bg-secondary)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img
-                    src={`${import.meta.env.VITE_API_URL}${user.company.logo.url}`}
-                    alt="Company Logo"
-                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                </div>
-              ) : (
-                <div className="user-avatar" style={{ width: '42px', height: '42px', fontSize: '14px', borderRadius: '50%', border: '2px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontWeight: '700' }}>
-                  {getCompanyInitials(user?.company?.companyName)}
-                </div>
-              )}
+              <div style={{ position: 'relative' }}>
+                {user?.company?.logo?.url ? (
+                  <div className="company-logo-circle" style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--accent)', padding: '1px', background: 'var(--bg-secondary)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img
+                      src={getLogoUrl(user.company.logo.url)}
+                      alt="Company Logo"
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="user-avatar" style={{ width: '42px', height: '42px', fontSize: '14px', borderRadius: '50%', border: '2px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontWeight: '700' }}>
+                    {getCompanyInitials(user?.company?.companyName)}
+                  </div>
+                )}
+                {/* Small Top-Right Badge */}
+                <img
+                  src={appLogoUrl}
+                  alt="App Logo"
+                  style={{ position: 'absolute', top: '-7px', right: '-4px', width: '16px', height: '16px', borderRadius: '50%', background: 'white', padding: '1px', border: '1px solid var(--border-color)', objectFit: 'contain', zIndex: 10 }}
+                />
+              </div>
             </div>
           ) : (
             <div
@@ -133,22 +172,30 @@ export default function Sidebar({ open, onClose, collapsed }) {
                 navigate('/settings/company-profile');
                 onClose();
               }}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', gap: '10px' }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', gap: '4px' }}
               data-tooltip="Open Company Profile"
             >
-              {user?.company?.logo?.url ? (
-                <div className="company-logo-circle" style={{ width: '56px', height: '56px', borderRadius: '50%', border: '3px solid var(--accent)', padding: '2px', background: 'var(--bg-secondary)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img
-                    src={`${import.meta.env.VITE_API_URL}${user.company.logo.url}`}
-                    alt="Company Logo"
-                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
-                  />
-                </div>
-              ) : (
-                <div className="user-avatar" style={{ width: '56px', height: '56px', fontSize: '20px', borderRadius: '50%', border: '3px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontWeight: '600' }}>
-                  {getCompanyInitials(user?.company?.companyName)}
-                </div>
-              )}
+              <div style={{ position: 'relative' }}>
+                {user?.company?.logo?.url ? (
+                  <div className="company-logo-circle" style={{ width: '56px', height: '56px', borderRadius: '50%', border: '3px solid var(--accent)', padding: '2px', background: 'var(--bg-secondary)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img
+                      src={getLogoUrl(user.company.logo.url)}
+                      alt="Company Logo"
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="user-avatar" style={{ width: '56px', height: '56px', fontSize: '20px', borderRadius: '50%', border: '3px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontWeight: '600' }}>
+                    {getCompanyInitials(user?.company?.companyName)}
+                  </div>
+                )}
+                {/* Small Top-Right Badge */}
+                <img
+                  src={appLogoUrl}
+                  alt="App Logo"
+                  style={{ position: 'absolute', top: '-2px', right: '-6px', width: '22px', height: '22px', borderRadius: '50%', background: 'white', padding: '2px', border: '1px solid var(--border-color)', objectFit: 'contain', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', zIndex: 10 }}
+                />
+              </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <span style={{ fontSize: '14.5px', fontWeight: '700', color: 'var(--text-primary)' }}>
@@ -197,15 +244,91 @@ export default function Sidebar({ open, onClose, collapsed }) {
               );
             }
 
+            if (group.isDropdown && group.subgroups) {
+              const isOpen = Boolean(expanded[group.title]);
+              return (
+                <div key={group.title} className="sidebar-group" style={{ marginBottom: '12px' }}>
+                  <button
+                    type="button"
+                    className={`sidebar-group-title ${isOpen ? 'is-open' : ''}`}
+                    onClick={() => toggleGroup(group.title)}
+                    data-tooltip={group.title}
+                    onMouseEnter={(e) => {
+                      if (!collapsed) return;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setActiveTooltip({ text: group.title, top: rect.top + rect.height / 2 - 17 });
+                    }}
+                    onMouseLeave={() => setActiveTooltip({ text: '', top: 0 })}
+                  >
+                    <div className="sidebar-group-title-left">
+                      {group.icon && <DynamicIcon name={group.icon} size={15} className="sidebar-group-icon" />}
+                      <span>{group.title}</span>
+                    </div>
+                    <ChevronDown size={14} className="sidebar-group-chevron" />
+                  </button>
+                  <GroupPanel isOpen={isOpen}>
+                    {group.subgroups.map((sub) => {
+                      const visibleSubItems = sub.items ? sub.items.filter((item) => canView(item.moduleKey)) : [];
+                      if (visibleSubItems.length === 0) return null;
+                      const isSubActive = visibleSubItems.some((item) => location.pathname.startsWith(item.path));
+                      const firstSubItemPath = visibleSubItems[0].path;
+
+                      return (
+                        <div key={sub.title}>
+                          <NavLink
+                            to={firstSubItemPath}
+                            className={({ isActive }) => `sidebar-link ${isSubActive ? 'active' : ''}`}
+                            onClick={isMobile ? undefined : onClose}
+                            data-tooltip={sub.title}
+                            onMouseEnter={(e) => {
+                              if (!collapsed) return;
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setActiveTooltip({ text: sub.title, top: rect.top + rect.height / 2 - 17 });
+                            }}
+                            onMouseLeave={() => setActiveTooltip({ text: '', top: 0 })}
+                          >
+                            <DynamicIcon name="Circle" size={10} className="sidebar-link-icon" style={{ opacity: 0.5 }} />
+                            <span>{sub.title}</span>
+                          </NavLink>
+                          
+                          {isMobile && isSubActive && (
+                            <div className="mobile-sub-nav" style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px', marginBottom: '8px' }}>
+                              {visibleSubItems.map(item => {
+                                const isItemActive = location.pathname.startsWith(item.path);
+                                return (
+                                  <NavLink
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={onClose}
+                                    className={() => `sidebar-link ${isItemActive ? 'active' : ''}`}
+                                    style={{ fontSize: '13px', padding: '6px 12px', minHeight: '32px' }}
+                                  >
+                                    <DynamicIcon name={item.icon || 'Circle'} size={12} className="sidebar-link-icon" />
+                                    <span>{item.label}</span>
+                                  </NavLink>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </GroupPanel>
+                </div>
+              );
+            }
+
             const visibleItems = group.items ? group.items.filter((item) => canView(item.moduleKey)) : [];
             if (visibleItems.length === 0) return null;
-            const isOpen = Boolean(expanded[group.title]);
+            const isActive = visibleItems.some((item) => location.pathname.startsWith(item.path));
+            const firstItemPath = visibleItems[0].path;
+
             return (
-              <div key={group.title} className="sidebar-group">
-                <button
-                  type="button"
-                  className={`sidebar-group-title ${isOpen ? 'is-open' : ''}`}
-                  onClick={() => toggleGroup(group.title)}
+              <div key={group.title} className="sidebar-group" style={{ marginBottom: '12px' }}>
+                <NavLink
+                  to={firstItemPath}
+                  className={() => `sidebar-group-title ${isActive ? 'active' : ''}`}
+                  onClick={isMobile ? undefined : onClose}
                   data-tooltip={group.title}
                   onMouseEnter={(e) => {
                     if (!collapsed) return;
@@ -213,69 +336,46 @@ export default function Sidebar({ open, onClose, collapsed }) {
                     setActiveTooltip({ text: group.title, top: rect.top + rect.height / 2 - 17 });
                   }}
                   onMouseLeave={() => setActiveTooltip({ text: '', top: 0 })}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    textDecoration: 'none',
+                    textAlign: 'left',
+                    width: '100%',
+                    margin: 0,
+                  }}
                 >
                   <div className="sidebar-group-title-left">
+                    {group.icon && <DynamicIcon name={group.icon} size={15} className="sidebar-group-icon" />}
                     <span>{group.title}</span>
                   </div>
-                  <ChevronDown size={14} className="sidebar-group-chevron" />
-                </button>
-                <GroupPanel isOpen={isOpen}>
-                  {visibleItems.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                      onClick={onClose}
-                      data-tooltip={item.label}
-                      onMouseEnter={(e) => {
-                        if (!collapsed) return;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setActiveTooltip({ text: item.label, top: rect.top + rect.height / 2 - 17 });
-                      }}
-                      onMouseLeave={() => setActiveTooltip({ text: '', top: 0 })}
-                    >
-                      {item.icon && <DynamicIcon name={item.icon} size={15} className="sidebar-link-icon" />}
-                      <span>{item.label}</span>
-                    </NavLink>
-                  ))}
-                </GroupPanel>
+                </NavLink>
+
+                {isMobile && isActive && (
+                  <div className="mobile-sub-nav" style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px', marginBottom: '8px' }}>
+                    {visibleItems.map(item => {
+                      const isItemActive = location.pathname.startsWith(item.path);
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          onClick={onClose}
+                          className={() => `sidebar-link ${isItemActive ? 'active' : ''}`}
+                          style={{ fontSize: '13px', padding: '6px 12px', minHeight: '32px' }}
+                        >
+                          <DynamicIcon name={item.icon || 'Circle'} size={12} className="sidebar-link-icon" />
+                          <span>{item.label}</span>
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
         </nav>
-        {/* Sidebar Footer: Theme & Logout buttons */}
+        {/* Sidebar Footer: Logout button */}
         <div className="sidebar-footer" style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--border-color)', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            onClick={cycleTheme}
-            data-tooltip={`Theme: ${mode}`}
-            onMouseEnter={(e) => {
-              if (!collapsed) return;
-              const rect = e.currentTarget.getBoundingClientRect();
-              setActiveTooltip({ text: `Theme: ${mode}`, top: rect.top + rect.height / 2 - 17 });
-            }}
-            onMouseLeave={() => setActiveTooltip({ text: '', top: 0 })}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '10px 12px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
-              background: 'none',
-              color: 'var(--text-primary)',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <ThemeIcon size={14} />
-            Theme: {mode.charAt(0).toUpperCase() + mode.slice(1)}
-          </button>
-
           <button
             onClick={handleLogout}
             data-tooltip="Logout"

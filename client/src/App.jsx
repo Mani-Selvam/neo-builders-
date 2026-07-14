@@ -13,6 +13,7 @@ import SignupPage from './pages/auth/SignupPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import RequestsPage from './pages/dashboard/RequestsPage';
 import MasterPage from './pages/masters/MasterPage';
 import UsersPage from './pages/administration/UsersPage';
 import RolesPage from './pages/administration/RolesPage';
@@ -39,8 +40,10 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/requests" element={<RequestsPage />} />
                     <Route path="/people/:slug" element={<MasterPage />} />
                     <Route path="/masters/:slug" element={<MasterPage />} />
+                    <Route path="/purchase/:slug" element={<MasterPage />} />
                     <Route path="/admin/users" element={<UsersPage />} />
                     <Route path="/admin/roles" element={<RolesPage />} />
                     <Route path="/admin/audit-logs" element={<AuditLogsPage />} />

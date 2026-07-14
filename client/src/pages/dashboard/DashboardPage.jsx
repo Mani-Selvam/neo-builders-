@@ -1,58 +1,52 @@
 import { useEffect, useState } from 'react';
-import { Users, Building, Truck, Package, HardHat, UserCheck } from 'lucide-react';
-import { dashboardApi } from '../../api/masterApi';
-import { useAuth } from '../../contexts/AuthContext';
-
-const CARD_DEFS = [
-  { key: 'totalEmployees', label: 'Employees', Icon: Users },
-  { key: 'activeSites', label: 'Active Sites', Icon: HardHat },
-  { key: 'totalClients', label: 'Clients', Icon: Building },
-  { key: 'totalSuppliers', label: 'Suppliers', Icon: Package },
-  { key: 'totalLabourers', label: 'Labourers', Icon: UserCheck },
-  { key: 'totalItems', label: 'Items', Icon: Package },
-  { key: 'totalTrucks', label: 'Trucks', Icon: Truck },
-  { key: 'activeUsers', label: 'Active Users', Icon: Users },
-];
+import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import { FileText, BarChart2 } from 'lucide-react';
+import EmptyState from '../../components/common/EmptyState';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [portalTarget, setPortalTarget] = useState(null);
 
   useEffect(() => {
-    dashboardApi
-      .getStats()
-      .then(({ data: res }) => setData(res.data))
-      .catch(() => setData(null))
-      .finally(() => setLoading(false));
+    setPortalTarget(document.getElementById('header-actions-target'));
   }, []);
 
   return (
     <div className="page">
+      {portalTarget && createPortal(
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+            className="icon-btn" 
+            onClick={() => navigate('/requests')}
+            title="Open Material Requests"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px' }}
+          >
+            <FileText size={16} />
+          </button>
+        </div>,
+        portalTarget
+      )}
+
       <div className="page-header">
         <div>
-          <h1>Welcome, {user?.name?.split(' ')[0]}</h1>
-          <p className="page-subtitle">Here's an overview of your construction operations</p>
+          <h1>Dashboard Overview</h1>
+          <p className="page-subtitle">High-level insights and analytics for your company</p>
         </div>
       </div>
 
-      {loading ? (
-        <div className="table-loading">Loading dashboard…</div>
-      ) : (
-        <div className="stat-grid">
-          {CARD_DEFS.map(({ key, label, Icon }) => (
-            <div key={key} className="stat-card">
-              <div className="stat-icon">
-                <Icon size={20} />
-              </div>
-              <div>
-                <div className="stat-value">{data?.stats?.[key] ?? 0}</div>
-                <div className="stat-label">{label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="table-card" style={{ padding: '60px 20px', display: 'flex', justifyContent: 'center' }}>
+        <EmptyState
+          icon={BarChart2}
+          title="Analytics Coming Soon"
+          description="Detailed pie charts, operational statistics, and financial summaries will be available here soon."
+          action={
+            <button className="btn btn-primary" onClick={() => navigate('/requests')}>
+              <FileText size={16} /> View Material Requests
+            </button>
+          }
+        />
+      </div>
     </div>
   );
 }

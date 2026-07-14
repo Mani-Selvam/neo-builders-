@@ -20,35 +20,52 @@ export async function authenticate(req, res, next) {
       return failure(res, { message: 'Invalid or expired token', statusCode: 401 });
     }
 
-    const user = await User.findById(payload.userId);
-    if (!user || user.status !== 'Active') {
-      return failure(res, { message: 'Account is not active', statusCode: 401 });
+    let user;
+    let role;
+    if (payload.isEmployee) {
+      const { Employee } = await import('../models/masters/index.js');
+      user = await Employee.findById(payload.userId);
+      if (!user || user.status !== 'Active') {
+        console.log('[authenticate] Employee not found or inactive', payload.userId);
+        return failure(res, { message: 'Account is not active', statusCode: 401 });
+      }
+    } else {
+      user = await User.findById(payload.userId);
+      if (!user || user.status !== 'Active') {
+        console.log('[authenticate] User not found or inactive', payload.userId);
+        return failure(res, { message: 'Account is not active', statusCode: 401 });
+      }
+      role = await Role.findById(user.roleId);
     }
 
-    const company = await Company.findById(user.companyId);
+    const company = await Company.findById(user.companyId || payload.companyId);
     if (!company) {
+      console.log('[authenticate] Company not found', user.companyId);
       return failure(res, { message: 'Company not found', statusCode: 401 });
     }
     if (company.status !== 'Active') {
+      console.log('[authenticate] Company inactive');
       return failure(res, { message: `Company account is ${company.status.toLowerCase()}. Please contact support.`, statusCode: 401 });
     }
 
-    const role = await Role.findById(user.roleId);
-
     req.user = {
       userId: user._id.toString(),
-      companyId: user.companyId.toString(),
-      name: user.name,
-      email: user.email,
-      isOwner: user.isOwner,
+      companyId: company._id.toString(),
+      name: user.name || user.empName,
+      email: user.email || user.emailId,
+      isOwner: user.isOwner || false,
+      isEmployee: !!payload.isEmployee,
+      siteTypeIds: user.siteTypeIds || [],
+      siteIds: user.siteIds || [],
       roleId: user.roleId?.toString(),
-      roleName: role?.name || '',
+      roleName: role?.name || 'Employee',
       permissions: role ? Object.fromEntries(role.permissions) : {},
     };
     req.company = company;
 
     next();
   } catch (err) {
+    console.log('[authenticate] Error:', err);
     next(err);
   }
 }
@@ -76,6 +93,18 @@ export function checkSubscription(req, res, next) {
 export function authorize(module, action = 'view') {
   return (req, res, next) => {
     if (req.user?.isOwner) return next();
+    
+    // Employee explicit permissions
+    if (req.user?.isEmployee) {
+      if (['materialRequests', 'sites', 'siteTypes'].includes(module)) {
+        return next();
+      }
+      return failure(res, {
+        message: `Employees do not have permission to access ${module}`,
+        statusCode: 403,
+      });
+    }
+
     const modulePerms = req.user?.permissions?.[module];
     if (!modulePerms || !modulePerms[action]) {
       return failure(res, {

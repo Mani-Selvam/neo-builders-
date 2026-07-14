@@ -26,6 +26,18 @@ export const companyApi = {
 };
 
 export const userApi = createMasterApi('users');
+export const materialRequestApi = createMasterApi('material-requests');
+export const productTypeApi = createMasterApi('product-types');
+export const itemCategoryApi = createMasterApi('item-categories');
+export const itemUomApi = createMasterApi('item-uoms');
+export const taxApi = createMasterApi('taxes');
+export const itemApi = createMasterApi('items');
+export const supplierApi = createMasterApi('suppliers');
+export const quotationApi = createMasterApi('quotations');
+
+export const uploadAttachment = (formData) => axiosClient.post('/upload-attachment', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
 export const roleApi = {
   list: () => axiosClient.get('/roles'),
   getOne: (id) => axiosClient.get(`/roles/${id}`),

@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || ''}/api/v1`,
+  baseURL: import.meta.env.DEV
+    ? '/api/v1'
+    : `${import.meta.env.VITE_API_URL || ''}/api/v1`,
   withCredentials: true,
 });
 
@@ -31,7 +33,7 @@ axiosClient.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
 
-    if (status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/')) {
+    if (status === 401 && !originalRequest._retry && !['/auth/login', '/auth/refresh', '/auth/logout'].some(path => originalRequest.url?.includes(path))) {
       originalRequest._retry = true;
       try {
         if (!refreshPromise) {

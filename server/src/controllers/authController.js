@@ -27,17 +27,15 @@ async function issueTokens(res, user, req) {
   const accessToken = signAccessToken({ userId: user._id.toString(), companyId: user.companyId.toString() });
   const refreshToken = signRefreshToken({ userId: user._id.toString(), companyId: user.companyId.toString() });
 
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
   await RefreshToken.create({
     userId: user._id,
     companyId: user.companyId,
     token: refreshToken,
-    expiresAt,
     userAgent: req.headers['user-agent'] || '',
     ipAddress: req.ip,
   });
 
-  setRefreshCookie(res, refreshToken, 1000 * 60 * 60 * 24 * 30);
+  setRefreshCookie(res, refreshToken, 1000 * 60 * 60 * 24 * 365 * 100);
   return accessToken;
 }
 
@@ -204,7 +202,7 @@ export async function refresh(req, res, next) {
     }
 
     const stored = await RefreshToken.findOne({ token, revoked: false });
-    if (!stored || stored.expiresAt < new Date()) {
+    if (!stored) {
       throw new ApiError(401, 'Refresh session expired, please login again');
     }
 

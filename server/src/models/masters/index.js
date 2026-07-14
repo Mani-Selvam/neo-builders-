@@ -77,7 +77,8 @@ export const Employee = createMasterModel(
     empName: { type: String, required: true, trim: true },
     personalMobNo: { type: String, required: true },
     officeMobNo: { type: String, required: true },
-    siteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Site' },
+    siteTypeIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SiteType' }],
+    siteIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Site' }],
     departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department', required: true },
     designationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Designation' },
     dateOfBirth: { type: Date, required: true },
@@ -101,7 +102,8 @@ export const Employee = createMasterModel(
   {
     uniqueWith: 'empCode',
     refs: [
-      { path: 'siteId', ref: 'Site' },
+      { path: 'siteTypeIds', ref: 'SiteType' },
+      { path: 'siteIds', ref: 'Site' },
       { path: 'departmentId', ref: 'Department' },
       { path: 'designationId', ref: 'Designation' },
     ],
@@ -196,6 +198,76 @@ export const VehicleType = createMasterModel(
   { uniqueWith: 'vehicleType' }
 );
 
+export const Purchase = createMasterModel(
+  'Purchase',
+  {
+    statusName: { type: String, required: true, trim: true },
+    statusNo: { type: String, trim: true },
+    sortOrder: { type: Number },
+  },
+  { uniqueWith: 'statusName' }
+);
+
+export const Tax = createMasterModel(
+  'Tax',
+  {
+    taxName: { type: String, required: true, trim: true },
+    taxPercentage: { type: Number, required: true },
+  },
+  { uniqueWith: 'taxName' }
+);
+
+export const Charge = createMasterModel(
+  'Charge',
+  {
+    chargeName: { type: String, required: true, trim: true },
+  },
+  { uniqueWith: 'chargeName' }
+);
+
+export const ProductType = createMasterModel(
+  'ProductType',
+  {
+    productType: { type: String, required: true, trim: true },
+  },
+  { uniqueWith: 'productType' }
+);
+
+export const Priority = createMasterModel(
+  'Priority',
+  {
+    priorityName: { type: String, required: true, trim: true },
+    color: { type: String, trim: true },
+  },
+  { uniqueWith: 'priorityName' }
+);
+
+export const PaymentType = createMasterModel(
+  'PaymentType',
+  {
+    paymentWay: { type: String, required: true, trim: true },
+  },
+  { uniqueWith: 'paymentWay' }
+);
+
+export const PurchaseIndent = createMasterModel(
+  'PurchaseIndent',
+  {
+    indentDate: { type: Date, default: Date.now },
+    siteId: { type: mongoose.Schema.Types.ObjectId, ref: 'SiteType', required: true },
+    requiredDate: { type: String, required: true },
+    productTypeId: { type: mongoose.Schema.Types.ObjectId, ref: 'ProductType', required: true },
+    type: { type: String, required: true },
+    purposeOfIndent: { type: String, required: true }
+  },
+  {
+    refs: [
+      { path: 'siteId', ref: 'SiteType' },
+      { path: 'productTypeId', ref: 'ProductType' }
+    ]
+  }
+);
+
 export const Truck = createMasterModel(
   'Truck',
   {
@@ -230,6 +302,103 @@ export const FillingStation = createMasterModel(
   { uniqueWith: 'stationName' }
 );
 
+export const MaterialRequest = createMasterModel(
+  'MaterialRequest',
+  {
+    indentNo: { type: String },
+    raisedByName: { type: String, default: '' },
+    siteTypeId: { type: mongoose.Schema.Types.ObjectId, ref: 'SiteType', required: true },
+    priority: { type: String, required: true },
+    requiredDate: { type: String, required: true },
+    purpose: { type: String, required: true },
+    material: { type: String, required: true },
+    photos: [{ type: String }],
+    pmPdApproval: { type: String, default: 'Pending' },
+    productTypeId: { type: mongoose.Schema.Types.ObjectId, ref: 'ProductType' },
+    purchaseItems: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }],
+  },
+  {
+    refs: [
+      { path: 'siteTypeId', ref: 'SiteType' },
+      { path: 'productTypeId', ref: 'ProductType' },
+      { path: 'purchaseItems', ref: 'Item' }
+    ],
+    hooks: {
+      preSave: async function (next) {
+        // Auto-fill raisedByName from the Employee who created this request
+        if (!this.raisedByName && this.createdBy) {
+          try {
+            const Employee = mongoose.model('Employee');
+            const emp = await Employee.findById(this.createdBy);
+            if (emp && emp.empName) {
+              this.raisedByName = emp.empName;
+            } else {
+              // Fallback: check User collection (for admin-created requests)
+              const User = mongoose.model('User');
+              const user = await User.findById(this.createdBy);
+              if (user && user.name) {
+                this.raisedByName = user.name;
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching raisedByName', err);
+          }
+        }
+
+        // Auto-generate indentNo
+        if (!this.indentNo) {
+          try {
+            const SiteType = mongoose.model('SiteType');
+            const site = await SiteType.findById(this.siteTypeId);
+            let siteCode = 'UNK';
+            if (site && site.siteType) {
+              siteCode = site.siteType.substring(0, 3).toUpperCase();
+            }
+
+            const year = new Date().getFullYear().toString().slice(-2);
+
+            const MaterialRequestModel = this.constructor;
+            const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+
+            const count = await MaterialRequestModel.countDocuments({
+              companyId: this.companyId,
+              createdAt: { $gte: startOfYear }
+            });
+
+            const seq = (count + 1).toString().padStart(2, '0');
+            this.indentNo = `${siteCode}/${year}/${seq}`;
+          } catch (err) {
+            console.error('Error generating indentNo', err);
+          }
+        }
+        next();
+      }
+    }
+  }
+);
+
+export const Quotation = createMasterModel(
+  'Quotation',
+  {
+    materialRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'MaterialRequest', required: true },
+    supplierId: { type: mongoose.Schema.Types.ObjectId, ref: 'Supplier', required: true },
+    quoteRefNo: { type: String, required: true },
+    expectedDateOfDelivery: { type: String, required: true },
+    paymentTerms: { type: String, required: true },
+    freight: { type: String, required: true },
+    loading: { type: String, required: true },
+    unloading: { type: String, required: true },
+    fileUrl: { type: String },
+    termsAndConditions: [{ type: String }],
+  },
+  {
+    refs: [
+      { path: 'materialRequestId', ref: 'MaterialRequest' },
+      { path: 'supplierId', ref: 'Supplier' }
+    ]
+  }
+);
+
 export const MASTER_REGISTRY = {
   departments: { model: Department, label: 'Department' },
   designations: { model: Designation, label: 'Designation' },
@@ -248,4 +417,13 @@ export const MASTER_REGISTRY = {
   trucks: { model: Truck, label: 'Truck' },
   works: { model: Work, label: 'Work' },
   'filling-stations': { model: FillingStation, label: 'Filling Station' },
+  'material-requests': { model: MaterialRequest, label: 'Material Request' },
+  purchases: { model: Purchase, label: 'Purchase' },
+  taxes: { model: Tax, label: 'Tax' },
+  charges: { model: Charge, label: 'Charge' },
+  'product-types': { model: ProductType, label: 'Product Type' },
+  priorities: { model: Priority, label: 'Priority' },
+  'payment-types': { model: PaymentType, label: 'Payment Type' },
+  'purchase-indents': { model: PurchaseIndent, label: 'Purchase Indent' },
+  quotations: { model: Quotation, label: 'Quotation' },
 };

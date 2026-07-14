@@ -746,6 +746,11 @@ button {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Navigation Text Links (replaces old master tabs) */
+.nav-text-link:hover {
+  color: var(--text-primary) !important;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -796,6 +801,14 @@ button {
 /* Remove last child border */
 .data-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* Truncate long text in table cells */
+.cell-truncate div {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .col-actions {

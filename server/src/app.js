@@ -41,6 +41,20 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'NeoBuilder ERP API is running' });
 });
 
+// Temporary request logging to help debug route registration and auth issues
+app.use((req, res, next) => {
+  try {
+    const auth = req.headers.authorization ? 'present' : 'missing';
+    console.log(`[incoming] ${req.method} ${req.originalUrl} auth:${auth}`);
+    if (req.method === 'POST' || req.method === 'PUT') {
+      console.log('[incoming] body:', JSON.stringify(req.body));
+    }
+  } catch (err) {
+    // ignore logging errors
+  }
+  next();
+});
+
 app.use('/api/v1', apiRateLimiter, apiRoutes);
 
 app.use(notFoundHandler);

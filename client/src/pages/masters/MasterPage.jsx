@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams } from 'react-router-dom';
-import { Plus, Search, Pencil, Trash2, Power } from 'lucide-react';
-import { mastersConfig } from '../../config/mastersConfig';
+import { useParams, NavLink, useLocation } from 'react-router-dom';
+import { Plus, Search, Pencil, Trash2, Power, X } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import { mastersConfig, sidebarGroups } from '../../config/mastersConfig';
 import { createMasterApi } from '../../api/masterApi';
 import { useToast } from '../../contexts/ToastContext';
 import { useConfirm } from '../../contexts/ConfirmContext';
 import { getPath } from '../../utils/objectPath';
 import MasterFormModal from '../../components/masters/MasterFormModal';
+import ErrorBoundary from '../../components/common/ErrorBoundary';
 import MasterViewModal from '../../components/masters/MasterViewModal';
 import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
@@ -15,6 +17,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 
 export default function MasterPage() {
   const { slug } = useParams();
+  const location = useLocation();
   const config = mastersConfig[slug];
   const toast = useToast();
   const confirm = useConfirm();
@@ -35,6 +38,7 @@ export default function MasterPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRow, setEditingRow] = useState(null);
   const [viewingRow, setViewingRow] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -101,22 +105,48 @@ export default function MasterPage() {
   return (
     <div className="page">
       {portalTarget && createPortal(
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' }}>
-          <div className="search-input header-search" style={{ margin: 0 }}>
-            <Search size={15} />
-            <input
-              placeholder={`Search ${config.plural.toLowerCase()}…`}
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+          {showSearch ? (
+            <div className="search-input header-search" style={{ margin: 0, display: 'flex', alignItems: 'center' }}>
+              <Search size={15} />
+              <input
+                autoFocus
+                placeholder={`Search ${config.plural.toLowerCase()}…`}
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                style={{ width: '150px' }}
+              />
+              <button 
+                onClick={() => { setShowSearch(false); setSearch(''); setPage(1); fetchData(); }} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: 'var(--text-muted)' }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="icon-btn" 
+              onClick={() => setShowSearch(true)}
+              title="Search"
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px' }}
+            >
+              <Search size={15} />
+            </button>
+          )}
 
-          <button className="btn btn-primary header-add-btn" onClick={() => { setEditingRow(null); setModalOpen(true); }}>
-            <Plus size={15} /> <span className="btn-text">Add {config.title}</span>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => { setEditingRow(null); setModalOpen(true); }}
+            title={`Add ${config.title}`}
+            style={{ padding: '8px', borderRadius: '6px' }}
+          >
+            <Plus size={16} />
           </button>
         </div>,
         portalTarget
       )}
+
+
 
       <div className="table-card">
         {loading ? (
@@ -181,13 +211,15 @@ export default function MasterPage() {
       <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} onChange={setPage} />
 
       {modalOpen && (
-        <MasterFormModal
-          config={config}
-          initialData={editingRow}
-          toast={toast}
-          onClose={() => setModalOpen(false)}
-          onSaved={() => { setModalOpen(false); fetchData(); }}
-        />
+        <ErrorBoundary>
+          <MasterFormModal
+            config={config}
+            initialData={editingRow}
+            toast={toast}
+            onClose={() => setModalOpen(false)}
+            onSaved={() => { setModalOpen(false); fetchData(); }}
+          />
+        </ErrorBoundary>
       )}
 
       {viewingRow && (

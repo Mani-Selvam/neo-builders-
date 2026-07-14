@@ -20,7 +20,7 @@ export default function MasterViewModal({ config, data, onClose }) {
               let displayValue = value;
 
               if (field.type === 'select' || field.type === 'ref') {
-                if (value && typeof value === 'object') {
+                if (value && typeof value === 'object' && !Array.isArray(value)) {
                   displayValue =
                     value.departmentName ||
                     value.designationName ||
@@ -36,9 +36,18 @@ export default function MasterViewModal({ config, data, onClose }) {
                     value.clientName ||
                     '—';
                 }
+              } else if (field.type === 'multiselect') {
+                if (Array.isArray(value)) {
+                  displayValue = value.map(v => {
+                    if (v && typeof v === 'object') {
+                      return v.siteType || v.siteName || v.departmentName || v.name || v.empName || v._id;
+                    }
+                    return String(v);
+                  }).join(', ');
+                }
               }
 
-              if (displayValue === undefined || displayValue === null || displayValue === '') {
+              if (displayValue === undefined || displayValue === null || displayValue === '' || (Array.isArray(value) && value.length === 0)) {
                 displayValue = '—';
               }
 

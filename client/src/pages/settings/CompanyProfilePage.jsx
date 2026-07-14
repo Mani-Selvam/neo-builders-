@@ -89,9 +89,9 @@ export default function CompanyProfilePage() {
   const getLogoUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    const base = import.meta.env.VITE_API_URL.replace(/\/$/, '');
-    const cleanPath = url.replace(/^\//, '').replace(/^\/?/, '');
-    return `${base}/${cleanPath}`;
+    const baseUrl = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || '');
+    const cleanPath = url.replace(/^\//, '');
+    return baseUrl ? `${baseUrl.replace(/\/$/, '')}/${cleanPath}` : `/${cleanPath}`;
   };
 
   if (loading) return <div className="table-loading">Loading…</div>;
@@ -119,16 +119,16 @@ export default function CompanyProfilePage() {
 
       <form className="table-card" onSubmit={handleSubmit}>
         <div className="modal-body" style={{ padding: '24px' }}>
-          <label 
-            className="logo-upload-section" 
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px', 
-              cursor: 'pointer', padding: '16px', border: `2px dashed ${isDragging ? 'var(--accent)' : 'var(--border)'}`, 
+          <label
+            className="logo-upload-section"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px',
+              cursor: 'pointer', padding: '16px', border: `2px dashed ${isDragging ? 'var(--accent)' : 'var(--border)'}`,
               borderRadius: '12px', transition: 'background 0.2s, border-color 0.2s',
               background: isDragging ? 'var(--bg-hover)' : 'transparent'
             }}
-            onMouseOver={(e) => { if(!isDragging) e.currentTarget.style.background = 'var(--bg-hover)'; }}
-            onMouseOut={(e) => { if(!isDragging) e.currentTarget.style.background = 'transparent'; }}
+            onMouseOver={(e) => { if (!isDragging) e.currentTarget.style.background = 'var(--bg-hover)'; }}
+            onMouseOut={(e) => { if (!isDragging) e.currentTarget.style.background = 'transparent'; }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}

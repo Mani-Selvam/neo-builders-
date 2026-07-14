@@ -245,7 +245,9 @@ function App() {
   const getLogoUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return url;
+    const baseUrl = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || '');
+    const cleanPath = url.replace(/^\//, '');
+    return baseUrl ? `${baseUrl.replace(/\/$/, '')}/${cleanPath}` : `/${cleanPath}`;
   };
 
   // Companies filtering logic

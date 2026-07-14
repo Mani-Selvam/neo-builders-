@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { ChevronLeft, ChevronRight, ArrowLeft, ArrowRight, Menu } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import { sidebarGroups } from '../../config/mastersConfig';
 
 export default function AppLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -43,8 +45,8 @@ export default function AppLayout() {
         )}
       </button>
 
-      <Sidebar open={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} collapsed={desktopSidebarCollapsed && !isMobile} />
-      <div className="app-main">
+      <Sidebar open={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} collapsed={desktopSidebarCollapsed && !isMobile} isMobile={isMobile} />
+      <div className="app-main" id="app-main-target" style={{ position: 'relative' }}>
         {/* Navigation History Control Bar */}
         <div className="navigation-history-bar" style={{
           display: 'flex',
@@ -104,18 +106,66 @@ export default function AppLayout() {
             </button>
           </div>
 
-          {/* Breadcrumbs based on path */}
-          <div className="header-breadcrumbs" style={{ fontSize: '12.5px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '12px', textTransform: 'capitalize' }}>
-            <span>Home</span>
-            {location.pathname.split('/').filter(Boolean).map((part, index, arr) => (
-              <span key={index} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>/</span>
-                <span style={{ color: index === arr.length - 1 ? 'var(--text-h)' : 'var(--text-muted)', fontWeight: index === arr.length - 1 ? '600' : '400' }}>
-                  {part.replace(/-/g, ' ')}
-                </span>
-              </span>
-            ))}
-          </div>
+          <div id="header-title-target" style={{ marginLeft: '16px', display: 'flex', alignItems: 'center' }} />
+
+          {/* Master Tabs as Breadcrumb-style links */}
+          {(() => {
+            const loc = location.pathname;
+            let activeItems = null;
+
+            for (const group of sidebarGroups) {
+              if (group.items && group.items.some(i => loc.startsWith(i.path))) {
+                activeItems = group.items;
+                break;
+              }
+              if (group.subgroups) {
+                for (const sub of group.subgroups) {
+                  if (sub.items && sub.items.some(i => loc.startsWith(i.path))) {
+                    activeItems = sub.items;
+                    break;
+                  }
+                }
+              }
+              if (activeItems) break;
+            }
+
+            if (!activeItems) return null;
+
+            if (isMobile) return null; // Hide top tabs on mobile, sidebar handles it
+
+            return (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                marginLeft: '12px', 
+                fontSize: '13px',
+                overflowX: 'auto',
+                whiteSpace: 'nowrap',
+                scrollbarWidth: 'none'
+              }}>
+                {activeItems.map((item, index) => (
+                  <span key={item.path} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) => `nav-text-link ${isActive ? 'active' : ''}`}
+                      style={({ isActive }) => ({
+                        color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                        fontWeight: isActive ? '600' : '500',
+                        textDecoration: 'none',
+                        transition: 'color 0.2s ease'
+                      })}
+                    >
+                      {item.label}
+                    </NavLink>
+                    {index < activeItems.length - 1 && (
+                      <span style={{ color: 'var(--border-color)' }}>/</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Portal target for page actions (search & add button) */}
           <div id="header-actions-target" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }} />

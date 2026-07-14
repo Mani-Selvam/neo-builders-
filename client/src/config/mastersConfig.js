@@ -133,7 +133,7 @@ export const mastersConfig = {
       { name: 'emailId', label: 'Email ID', type: 'email', section: 'Contact Information' },
       { name: 'departmentId', label: 'Department', type: 'select', refEndpoint: 'departments', refLabel: 'departmentName', required: true, section: 'Employment Information' },
       { name: 'designationId', label: 'Designation', type: 'select', refEndpoint: 'designations', refLabel: 'designationName', section: 'Employment Information' },
-      { name: 'siteId', label: 'Site', type: 'select', refEndpoint: 'sites', refLabel: 'siteName', section: 'Employment Information' },
+      { name: 'siteTypeIds', label: 'Assigned Site Types', type: 'multiselect', refEndpoint: 'site-types', refLabel: 'siteType', section: 'Employment Information' },
       { name: 'dateOfJoining', label: 'Date of Joining', type: 'date', required: true, section: 'Employment Information' },
       { name: 'aadhaarNo', label: 'Aadhaar No', type: 'text', required: true, section: 'Identity Information' },
       { name: 'panNo', label: 'PAN No', type: 'text', section: 'Identity Information' },
@@ -247,6 +247,92 @@ export const mastersConfig = {
       { name: 'qsDataEntryId', label: 'QS Data Entry', type: 'select', refEndpoint: 'employees', refLabel: 'empName' },
     ],
   },
+  purchase: {
+    title: 'Purchase',
+    plural: 'Purchases',
+    description: 'Manage purchase status and sorting',
+    endpoint: 'purchases',
+    moduleKey: 'purchase',
+    columns: [
+      { key: 'statusName', label: 'Status Name' },
+      { key: 'statusNo', label: 'Status No' },
+      { key: 'sortOrder', label: 'Sort Order' },
+    ],
+    fields: [
+      { name: 'statusName', label: 'Status Name', type: 'text', required: true },
+      { name: 'statusNo', label: 'Status No', type: 'text' },
+      { name: 'sortOrder', label: 'Sort Order', type: 'number' },
+    ],
+  },
+  tax: {
+    title: 'Tax',
+    plural: 'Taxes',
+    description: 'Manage tax types and percentages',
+    endpoint: 'taxes',
+    moduleKey: 'tax',
+    columns: [
+      { key: 'taxName', label: 'Tax Name' },
+      { key: 'taxPercentage', label: 'Tax Percentage (%)' },
+    ],
+    fields: [
+      { name: 'taxName', label: 'Tax Name', type: 'text', required: true },
+      { name: 'taxPercentage', label: 'Tax Percentage', type: 'number', required: true },
+    ],
+  },
+  charge: {
+    title: 'Charge',
+    plural: 'Charges',
+    description: 'Manage extra charges like loading, unloading',
+    endpoint: 'charges',
+    moduleKey: 'charge',
+    columns: [
+      { key: 'chargeName', label: 'Charge Name' },
+    ],
+    fields: [
+      { name: 'chargeName', label: 'Charge Name', type: 'text', required: true },
+    ],
+  },
+  'product-type': {
+    title: 'Product Type',
+    plural: 'Product Types',
+    description: 'Manage product types',
+    endpoint: 'product-types',
+    moduleKey: 'productType',
+    columns: [
+      { key: 'productType', label: 'Product Type' },
+    ],
+    fields: [
+      { name: 'productType', label: 'Product Type', type: 'text', required: true },
+    ],
+  },
+  priority: {
+    title: 'Priority',
+    plural: 'Priorities',
+    description: 'Manage priorities and colors',
+    endpoint: 'priorities',
+    moduleKey: 'priority',
+    columns: [
+      { key: 'priorityName', label: 'Priority Name' },
+      { key: 'color', label: 'Color' },
+    ],
+    fields: [
+      { name: 'priorityName', label: 'Priority Name', type: 'text', required: true },
+      { name: 'color', label: 'Color (Hex)', type: 'text' },
+    ],
+  },
+  'payment-type': {
+    title: 'Payment Type',
+    plural: 'Payment Types',
+    description: 'Manage payment methods and ways',
+    endpoint: 'payment-types',
+    moduleKey: 'paymentType',
+    columns: [
+      { key: 'paymentWay', label: 'Payment Way' },
+    ],
+    fields: [
+      { name: 'paymentWay', label: 'Payment Way', type: 'text', required: true },
+    ],
+  },
   'vehicle-types': {
     title: 'Vehicle Type',
     plural: 'Vehicle Types',
@@ -288,6 +374,28 @@ export const mastersConfig = {
       { name: 'unitId', label: 'Unit', type: 'select', refEndpoint: 'item-uoms', refLabel: 'uomName', required: true },
     ],
   },
+  'purchase-indents': {
+    title: 'Purchase Indent',
+    plural: 'Purchase Indents',
+    description: 'Manage purchase indent requests',
+    endpoint: 'purchase-indents',
+    moduleKey: 'purchaseIndents',
+    columns: [
+      { key: 'indentDate', label: 'Date', type: 'date' },
+      { key: 'siteId', label: 'Site', type: 'ref' },
+      { key: 'requiredDate', label: 'Required Date' },
+      { key: 'productTypeId', label: 'Product Type', type: 'ref' },
+      { key: 'type', label: 'Type' },
+      { key: 'purposeOfIndent', label: 'Purpose' },
+    ],
+    fields: [
+      { name: 'siteId', label: 'Site', type: 'select', refEndpoint: 'site-types', refLabel: 'siteType', required: true },
+      { name: 'requiredDate', label: 'Required Date', type: 'date', required: true },
+      { name: 'productTypeId', label: 'Product Type', type: 'select', refEndpoint: 'product-types', refLabel: 'productType', required: true },
+      { name: 'type', label: 'Type', type: 'select', options: [{ label: 'Regular', value: 'Regular' }, { label: 'Urgent', value: 'Urgent' }, { label: 'Emergency', value: 'Emergency' }], required: true },
+      { name: 'purposeOfIndent', label: 'Purpose Of Indent', type: 'textarea', required: true },
+    ],
+  },
   'filling-stations': {
     title: 'Filling Station',
     plural: 'Filling Stations',
@@ -315,24 +423,48 @@ export const sidebarGroups = [
   },
 
   {
-    title: 'Main Masters',
+    title: 'Masters',
     icon: 'Layers',
-    items: [
-      { label: 'Site Type', path: '/masters/site-types', moduleKey: 'siteTypes', icon: 'MapPinned' },
-      { label: 'Site', path: '/masters/sites', moduleKey: 'sites', icon: 'MapPin' },
-      { label: 'Item Category', path: '/masters/item-categories', moduleKey: 'itemCategories', icon: 'FolderTree' },
-      { label: 'Item UOM', path: '/masters/item-uoms', moduleKey: 'itemUoms', icon: 'Ruler' },
-      { label: 'Item Master', path: '/masters/items', moduleKey: 'items', icon: 'Package' },
-      { label: 'Work Master', path: '/masters/works', moduleKey: 'works', icon: 'Construction' },
-      { label: 'Labour Type', path: '/masters/labour-types', moduleKey: 'labourTypes', icon: 'Hammer' },
-      { label: 'Vehicle Type', path: '/masters/vehicle-types', moduleKey: 'vehicleTypes', icon: 'CarFront' },
-      { label: 'Trucks', path: '/masters/trucks', moduleKey: 'trucks', icon: 'Truck' },
-      { label: 'Filling Stations', path: '/masters/filling-stations', moduleKey: 'fillingStations', icon: 'Fuel' },
-      { label: 'Expenses Master', path: '/masters/expenses', moduleKey: 'expenses', icon: 'Receipt' },
-    ],
+    isDropdown: true,
+    subgroups: [
+      {
+        title: 'Main',
+        items: [
+          { label: 'Site Type', path: '/masters/site-types', moduleKey: 'siteTypes', icon: 'MapPinned' },
+          { label: 'Site', path: '/masters/sites', moduleKey: 'sites', icon: 'MapPin' },
+          { label: 'UOM', path: '/masters/item-uoms', moduleKey: 'itemUoms', icon: 'Ruler' },
+          { label: 'Item Category', path: '/masters/item-categories', moduleKey: 'itemCategories', icon: 'FolderTree' },
+          { label: 'Item Master', path: '/masters/items', moduleKey: 'items', icon: 'Package' },
+          { label: 'Work', path: '/masters/works', moduleKey: 'works', icon: 'Construction' },
+          { label: 'Labour', path: '/masters/labour-types', moduleKey: 'labourTypes', icon: 'Hammer' },
+          { label: 'Vehicle', path: '/masters/vehicle-types', moduleKey: 'vehicleTypes', icon: 'CarFront' },
+          { label: 'Trucks', path: '/masters/trucks', moduleKey: 'trucks', icon: 'Truck' },
+          { label: 'Filling', path: '/masters/filling-stations', moduleKey: 'fillingStations', icon: 'Fuel' },
+          { label: 'Expenses', path: '/masters/expenses', moduleKey: 'expenses', icon: 'Receipt' },
+        ]
+      },
+      {
+        title: 'Other',
+        items: [
+          { label: 'Purchase', path: '/masters/purchase', moduleKey: 'purchase', icon: 'ShoppingCart' },
+          { label: 'Tax', path: '/masters/tax', moduleKey: 'tax', icon: 'Percent' },
+          { label: 'Charge', path: '/masters/charge', moduleKey: 'charge', icon: 'Coins' },
+          { label: 'Product Type', path: '/masters/product-type', moduleKey: 'productType', icon: 'PackageOpen' },
+          { label: 'Priority', path: '/masters/priority', moduleKey: 'priority', icon: 'Flag' },
+          { label: 'Payment Type', path: '/masters/payment-type', moduleKey: 'paymentType', icon: 'Banknote' }
+        ]
+      }
+    ]
   },
   {
-    title: 'People Masters',
+    title: 'Purchase',
+    icon: 'ShoppingCart',
+    items: [
+      { label: 'Purchase Indent', path: '/purchase/purchase-indents', moduleKey: 'purchaseIndents', icon: 'FileText' },
+    ]
+  },
+  {
+    title: 'People',
     icon: 'Users',
     items: [
       { label: 'Department', path: '/people/departments', moduleKey: 'departments', icon: 'Building' },

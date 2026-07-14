@@ -26,7 +26,12 @@ export function createMasterModel(modelName, fields, options = {}) {
     schema.index({ companyId: 1, [options.uniqueWith]: 1 }, { unique: true });
   }
 
+  if (options.hooks && typeof options.hooks.preSave === 'function') {
+    schema.pre('save', options.hooks.preSave);
+  }
+
   schema.set('toJSON', {
+    getters: true,
     transform: (_doc, ret) => {
       ret.id = ret._id;
       return ret;

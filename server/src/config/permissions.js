@@ -20,6 +20,12 @@ export const MODULES = [
   'roles',
   'auditLogs',
   'company',
+  'purchaseStatus',
+  'taxMasters',
+  'otherChargesMaster',
+  'productTypes',
+  'priorityMasters',
+  'paymentTypes',
 ];
 
 export const ACTIONS = ['view', 'create', 'edit', 'delete', 'print', 'export', 'approve'];

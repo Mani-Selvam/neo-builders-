@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { authApi } from '../api/authApi';
 import { setAccessToken, setUnauthorizedHandler } from '../api/axiosClient';
 
@@ -17,7 +17,12 @@ export function AuthProvider({ children }) {
     setUnauthorizedHandler(clearSession);
   }, [clearSession]);
 
+  const initStarted = useRef(false);
+
   useEffect(() => {
+    if (initStarted.current) return;
+    initStarted.current = true;
+
     (async () => {
       try {
         const { data } = await authApi.refresh();

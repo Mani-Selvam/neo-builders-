@@ -4,14 +4,28 @@ import { success, ApiError } from '../utils/apiResponse.js';
 
 async function assertRefsBelongToCompany(model, companyId, body) {
   for (const ref of model.refs || []) {
+    if (ref.path === 'createdBy' || ref.path === 'updatedBy') continue;
     const value = body[ref.path];
     if (!value) continue;
     const RefModel = mongoose.model(ref.ref);
-    const doc = await RefModel.findOne({ _id: value, companyId });
-    if (!doc) {
-      throw new ApiError(422, `Referenced ${ref.ref} record does not belong to your company or does not exist`, {
-        [ref.path]: `Invalid ${ref.ref} reference`,
-      });
+
+    if (Array.isArray(value)) {
+      for (const val of value) {
+        if (!val) continue;
+        const doc = await RefModel.findOne({ _id: val, companyId });
+        if (!doc) {
+          throw new ApiError(422, `Referenced ${ref.ref} record does not belong to your company or does not exist`, {
+            [ref.path]: `Invalid ${ref.ref} reference for id ${val}`,
+          });
+        }
+      }
+    } else {
+      const doc = await RefModel.findOne({ _id: value, companyId });
+      if (!doc) {
+        throw new ApiError(422, `Referenced ${ref.ref} record does not belong to your company or does not exist`, {
+          [ref.path]: `Invalid ${ref.ref} reference`,
+        });
+      }
     }
   }
 }
@@ -37,7 +51,7 @@ export function createMasterController(model, moduleName, searchableFields = [])
         let queryObj = model.find(query);
         if (model.refs && model.refs.length) {
           model.refs.forEach(ref => {
-            queryObj = queryObj.populate(ref.path);
+            queryObj = queryObj.populate({ path: ref.path, model: ref.ref });
           });
         }
 
@@ -66,10 +80,19 @@ export function createMasterController(model, moduleName, searchableFields = [])
     async listAll(req, res, next) {
       try {
         const query = { companyId: req.user.companyId, status: 'Active' };
+
+        if (req.user.isEmployee) {
+          if (model.modelName === 'Site') {
+            query._id = { $in: req.user.siteIds || [] };
+          } else if (model.modelName === 'SiteType') {
+            query._id = { $in: req.user.siteTypeIds || [] };
+          }
+        }
+
         let queryObj = model.find(query).sort('-createdAt').limit(1000);
         if (model.refs && model.refs.length) {
           model.refs.forEach(ref => {
-            queryObj = queryObj.populate(ref.path);
+            queryObj = queryObj.populate({ path: ref.path, model: ref.ref });
           });
         }
         const items = await queryObj;
@@ -84,7 +107,7 @@ export function createMasterController(model, moduleName, searchableFields = [])
         let queryObj = model.findOne({ _id: req.params.id, companyId: req.user.companyId });
         if (model.refs && model.refs.length) {
           model.refs.forEach(ref => {
-            queryObj = queryObj.populate(ref.path);
+            queryObj = queryObj.populate({ path: ref.path, model: ref.ref });
           });
         }
         const doc = await queryObj;
